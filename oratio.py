@@ -66,6 +66,17 @@ class User:
         return [m["id"] for m in self.get("models")["data"]]
 
 
+    def get_response_from_agent(self, agent, message):
+        response = self.post("chat/completions", json={
+            "model": agent.model,
+            "messages": [
+                {"role": "system", "content": agent.prompt},
+                {"role": "user", "content": message}
+            ]
+        })
+        return Response(response)
+
+
 
 class Agent:
     """An agent that can participate in conversations.
@@ -83,3 +94,27 @@ class Agent:
         prompt = self.prompt
         if len(prompt) > 40: prompt = f"{prompt[:37]}..."
         return f"Agent({prompt})"
+
+
+
+class Response:
+    """A response from an agent in a conversation. This is a wrapper around an
+    OpenAI completion.
+    
+    :param dict json: The JSON data from the API.
+    """
+
+    def __init__(self, json):
+        self.id = json["id"]
+        self.created = json["created"]
+        self.choices = [choice["message"]["content"] for choice in json["choices"]]
+        self.prompt_tokens_used = json["usage"]["prompt_tokens"]
+        self.completion_tokens_used = json["usage"]["completion_tokens"]
+        self.tokens_used = json["usage"]["total_tokens"]
+        self.message = self.choices[0]
+    
+
+    def __repr__(self):
+        truncated = self.message
+        if len(truncated) > 40: truncated = f"{truncated[:37]}..."
+        return f"Response({truncated})"
