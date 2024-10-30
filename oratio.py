@@ -67,14 +67,14 @@ class User:
 
 
     def get_response_from_agent(self, agent, message):
-        response = self.post("chat/completions", json={
+        response = Response(self.post("chat/completions", json={
             "model": agent.model,
             "messages": [
                 {"role": "system", "content": agent.prompt},
                 {"role": "user", "content": message}
             ]
-        })
-        return Response(response)
+        }))
+        return Message("assistant", response.message, response)
 
 
 
@@ -118,3 +118,24 @@ class Response:
         truncated = self.message
         if len(truncated) > 40: truncated = f"{truncated[:37]}..."
         return f"Response({truncated})"
+
+
+
+class Message:
+    """A message in a conversation.
+    
+    :param str role: The role of the message ("assistant", "system" etc.).
+    :param str content: The content of the message.
+    :param Response response: The API response that generated this message.
+    """
+
+    def __init__(self, role, content, response=None):
+        self.role = role
+        self.content = content
+        self.response = response
+    
+
+    def __repr__(self):
+        truncated = self.content
+        if len(truncated) > 40: truncated = f"{truncated[:37]}..."
+        return f"Message([{self.role}] {truncated})"
