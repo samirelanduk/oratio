@@ -9,3 +9,4 @@ dist
 *.png
 *.json
 *.svg
+run.py
