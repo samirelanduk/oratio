@@ -66,15 +66,26 @@ class User:
         return [m["id"] for m in self.get("models")["data"]]
 
 
-    def get_response_from_agent(self, agent, message):
+    def start_conversation_with_agent(self, agent, message):
+        """Start a conversation with an agent by sending an opening message. A
+        conversation is returned which can then be continued.
+        
+        :param Agent agent: The agent to converse with.
+        :param str message: The opening message.
+        :rtype: Conversation
+        """
+
         response = Response(self.post("chat/completions", json={
             "model": agent.model,
             "messages": [
-                {"role": "system", "content": agent.prompt},
+                {"role": "system", "content": agent.prompt.content},
                 {"role": "user", "content": message}
             ]
         }))
-        return Message("assistant", response.message, response)
+        return Conversation(self, agent, [
+            agent.prompt,
+            Message("assistant", response.message, response)
+        ])
 
 
 
@@ -87,11 +98,11 @@ class Agent:
 
     def __init__(self, model, prompt):
         self.model = model
-        self.prompt = prompt
+        self.prompt = Message("system", prompt)
     
 
     def __repr__(self):
-        prompt = self.prompt
+        prompt = self.prompt.content
         if len(prompt) > 40: prompt = f"{prompt[:37]}..."
         return f"Agent({prompt})"
 
@@ -139,3 +150,22 @@ class Message:
         truncated = self.content
         if len(truncated) > 40: truncated = f"{truncated[:37]}..."
         return f"Message([{self.role}] {truncated})"
+
+
+
+class Conversation:
+    """A conversation between a user and an agent.
+
+    :param User user: The user in the conversation.
+    :param Agent agent: The agent in the conversation.
+    :param list messages: The initial messages in the conversation.
+    """
+
+    def __init__(self, user, agent, messages):
+        self.user = user
+        self.agent = agent
+        self.messages = messages
+    
+
+    def __repr__(self):
+        return f"Conversation({self.agent})"
