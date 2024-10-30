@@ -64,3 +64,22 @@ class User:
         """
 
         return [m["id"] for m in self.get("models")["data"]]
+
+
+
+class Agent:
+    """An agent that can participate in conversations.
+    
+    :param str model: The ID of the model to use.
+    :param str prompt: The initial prompt to use.
+    """
+
+    def __init__(self, model, prompt):
+        self.model = model
+        self.prompt = prompt
+    
+
+    def __repr__(self):
+        prompt = self.prompt
+        if len(prompt) > 40: prompt = f"{prompt[:37]}..."
+        return f"Agent({prompt})"
