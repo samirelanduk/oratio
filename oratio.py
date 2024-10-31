@@ -1,3 +1,5 @@
+import time
+import random
 import requests
 
 class User:
@@ -66,12 +68,14 @@ class User:
         return [m["id"] for m in self.get("models")["data"]]
 
 
-    def start_conversation_with_agent(self, agent, message):
+    def start_conversation_with_agent(self, agent, message, print=True, typed=True):
         """Start a conversation with an agent by sending an opening message. A
         conversation is returned which can then be continued.
         
         :param Agent agent: The agent to converse with.
         :param str message: The opening message.
+        :param bool print: Whether to print the message the agent returns.
+        :param bool typed: Whether to type out the message the agent returns.
         :rtype: Conversation
         """
 
@@ -82,10 +86,10 @@ class User:
                 {"role": "user", "content": message}
             ]
         }))
-        return Conversation(self, agent, [
-            agent.prompt,
-            Message("assistant", response.message, response)
-        ])
+        user_message = Message("user", message)
+        message = Message("assistant", response.message, response)
+        if print: message.print(typed=typed)
+        return Conversation(self, agent, [agent.prompt, user_message, message])
 
 
 
@@ -152,6 +156,23 @@ class Message:
         return f"Message([{self.role}] {truncated})"
 
 
+    def print(self, typed=False):
+        """Prints the message to the console, optionally typing it out one
+        character at a time.
+        
+        :param bool typed: Whether to type out the message.
+        """
+
+        if not typed:
+            print(self.content)
+            return
+        for char in self.content:
+            delay = random.uniform(0.01, 0.05)
+            print(char, end="", flush=True)
+            time.sleep(delay)
+        print()
+
+
 
 class Conversation:
     """A conversation between a user and an agent.
@@ -169,3 +190,12 @@ class Conversation:
 
     def __repr__(self):
         return f"Conversation({self.agent})"
+    
+
+    def print(self):
+        """Prints the conversation to the console."""
+        
+        for message in self.messages:
+            print(f"[{message.role}]")
+            message.print()
+            print()
