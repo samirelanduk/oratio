@@ -220,7 +220,7 @@ class Conversation:
         :param bool typed: Whether to type out the message the agent returns.
         :rtype: Message
         """
-        
+
         self.messages.append(Message("user", content))
         response = Response(self.user.post("chat/completions", json={
             "model": self.agent.model,
@@ -234,7 +234,21 @@ class Conversation:
         self.messages.append(message)
         return message
 
-    
+
+    def loop(self, typed=True):
+        """Continuously prompt the user for messages and respond to them until
+        the user types "exit".
+        
+        :param bool typed: Whether to type out the messages the agent returns.
+        """
+
+        while True:
+            print()
+            message = input("> ")
+            print()
+            if message == "exit": break
+            self.message(message, typed=typed)
+
 
     def print(self):
         """Prints the conversation to the console."""
