@@ -154,6 +154,16 @@ class Message:
         truncated = self.content
         if len(truncated) > 40: truncated = f"{truncated[:37]}..."
         return f"Message([{self.role}] {truncated})"
+    
+
+    def to_dict(self):
+        """Converts the message to a dictionary, in the format expected by the
+        OpenAI API.
+        
+        :rtype: dict
+        """
+
+        return {"role": self.role, "content": self.content}
 
 
     def print(self, typed=False):
@@ -192,9 +202,43 @@ class Conversation:
         return f"Conversation({self.agent})"
     
 
+    def to_list(self):
+        """Converts the conversation to a list of dictionaries, in the format
+        expected by the OpenAI API.
+
+        :rtype: list
+        """
+
+        return [message.to_dict() for message in self.messages]
+    
+
+    def message(self, content, print=True, typed=True):
+        """Continue a conversation by sending a message to the agent.
+        
+        :param str content: The message to send.
+        :param bool print: Whether to print the message the agent returns.
+        :param bool typed: Whether to type out the message the agent returns.
+        :rtype: Message
+        """
+        
+        self.messages.append(Message("user", content))
+        response = Response(self.user.post("chat/completions", json={
+            "model": self.agent.model,
+            "messages": [
+                *self.to_list(),
+                {"role": "user", "content": content}
+            ]
+        }))
+        message = Message("assistant", response.message, response)
+        if print: message.print(typed=typed)
+        self.messages.append(message)
+        return message
+
+    
+
     def print(self):
         """Prints the conversation to the console."""
-        
+
         for message in self.messages:
             print(f"[{message.role}]")
             message.print()
