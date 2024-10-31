@@ -2,6 +2,12 @@
 
 A wrapper around the Open AI API.
 
+## Install
+
+```bash
+pip install --upgrade https://github.com/samirelanduk/oratio/tarball/master
+```
+
 ## Users
 
 To begin with, you need a ``User`` object representing yourself - specifically your OpenAI account.
