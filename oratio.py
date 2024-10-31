@@ -68,7 +68,7 @@ class User:
         return [m["id"] for m in self.get("models")["data"]]
 
 
-    def start_conversation_with_agent(self, agent, message, print=True, typed=True):
+    def start_conversation_with_agent(self, agent, message, print=True, typed=True, loop=False):
         """Start a conversation with an agent by sending an opening message. A
         conversation is returned which can then be continued.
         
@@ -76,6 +76,7 @@ class User:
         :param str message: The opening message.
         :param bool print: Whether to print the message the agent returns.
         :param bool typed: Whether to type out the message the agent returns.
+        :param bool loop: Whether to start a loop that continuously prompts.
         :rtype: Conversation
         """
 
@@ -89,7 +90,9 @@ class User:
         user_message = Message("user", message)
         message = Message("assistant", response.message, response)
         if print: message.print(typed=typed)
-        return Conversation(self, agent, [agent.prompt, user_message, message])
+        conversation = Conversation(self, agent, [agent.prompt, user_message, message])
+        if loop: conversation.loop(typed=typed)
+        return conversation
 
 
 
