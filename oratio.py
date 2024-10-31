@@ -5,16 +5,16 @@ import requests
 class User:
     """A user of the OpenAI API, with a token and an account.
     
-    :param str token: The API token for the user.
+    :param str openai_key: The API key for the user.
     """
 
-    def __init__(self, token):
-        self.token = token
+    def __init__(self, openai_key):
+        self.openai_key = openai_key
     
 
     def __repr__(self):
-        truncated_token = self.token[:13] + "..." + self.token[-5:]
-        return f"User({truncated_token})"
+        truncated_key = self.openai_key[:13] + "..." + self.openai_key[-5:]
+        return f"User({truncated_key})"
     
 
     def request(self, method, path, **kwargs):
@@ -30,7 +30,7 @@ class User:
             method,
             f"https://api.openai.com/v1/{path}",
             headers={
-                "Authorization": f"Bearer {self.token}",
+                "Authorization": f"Bearer {self.openai_key}",
                 "Content-Type": "application/json",
             },
             **kwargs
