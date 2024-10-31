@@ -260,3 +260,14 @@ class Conversation:
             print(f"[{message.role}]")
             message.print()
             print()
+    
+
+    @property
+    def tokens_used(self):
+        """
+        The total number of tokens used in the conversation.
+        
+        :rtype: int
+        """
+
+        return sum(message.response.tokens_used for message in self.messages if message.response)
